@@ -133,9 +133,6 @@ void show_help(const char *argv0)
     printf("Usage: %s [OPTION]\n", argv0);
     printf("\n");
 
-    char memory_block_size_default[128];
-    human_readable_size(getpagesize(), memory_block_size_default, sizeof(memory_block_size_default));
-
     printf("Options:\n");
     printf("-v, --verbose[=VERBOSITY]\n");
     printf("    Set amount of verbosity: 0 for errors only, 1 for warnings, 2 for info (default), 3 for debug.\n");
