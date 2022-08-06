@@ -1,6 +1,8 @@
 AC_INIT([cache-hotness], [0.1])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
+AX_PROG_HELP2MAN
+
 AC_CONFIG_HEADERS([config.h])
 AC_USE_SYSTEM_EXTENSIONS
 
