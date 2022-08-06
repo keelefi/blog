@@ -1,0 +1,23 @@
+# Ignore files that are created by autoconf
+Makefile.in
+aclocal.m4
+autom4te.cache/
+compile
+config.h.in
+configure
+depcomp
+install-sh
+missing
+
+# Ignore files that are created by ./configure
+.deps/
+Makefile
+config.h
+config.log
+config.status
+stamp-h1
+
+# Ignore files that are created by make
+cache-hotness
+cache-hotness.o
+doc/
