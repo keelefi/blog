@@ -154,7 +154,7 @@ void show_help(const char *argv0)
     printf("-c, --cpu\n");
     printf("    Choose the CPU core to run on. Defaults to cpu_count-1.\n");
     printf("-o, --outfile\n");
-    printf("    Choose the CPU core to run on. Defaults to cpu_count-1.\n");
+    printf("    Specify output file. If no file is given, only stdout is used. The output file is JSON formatted.\n");
     printf("\n");
 
     printf("Examples:\n");
