@@ -90,7 +90,7 @@ size_t parse_size(const char *str)
     }
 
     char *new_str = malloc(str_length);
-    strncpy(new_str, str, str_length-1);
+    strcpy(new_str, str);
     new_str[str_length-1] = '\0';
 
     size_t result = atoi(new_str) * multiplier;
