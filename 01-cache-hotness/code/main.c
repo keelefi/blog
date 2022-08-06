@@ -857,18 +857,18 @@ int main(int argc, char *argv[])
     ssize_t cpu_freq_finish = get_cpu_freq_cpuinfo(&settings);
     if (settings.cpu_freq != cpu_freq_finish)
     {
-        printf("[%s] CPU freq at start is different than at finish!\n", is_child ? "CHILD" : "PARENT");
-        printf("[%s] Turn off freq scaling for more reliable results\n", is_child ? "CHILD" : "PARENT");
+        WARNING("CPU freq at start is different than at finish!\n");
+        WARNING("Turn off freq scaling for more reliable results\n");
         if (cpu_freq_to_str(settings.cpu_freq, buf, sizeof(buf)))
         {
             exit(EXIT_FAILURE);
         }
-        printf("[%s] CPU freq at start: %s\n", is_child ? "CHILD" : "PARENT", buf);
+        WARNING("CPU freq at start: %s\n", buf);
         if (cpu_freq_to_str(cpu_freq_finish, buf, sizeof(buf)))
         {
             exit(EXIT_FAILURE);
         }
-        printf("[%s] CPU freq at finish: %s\n", is_child ? "CHILD" : "PARENT", buf);
+        WARNING("CPU freq at finish: %s\n", buf);
     }
 
     if (!is_child)
