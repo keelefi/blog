@@ -124,6 +124,17 @@ ssize_t human_readable_size(size_t size, char *buf, size_t buf_size)
     return result;
 }
 
+void show_version(const char *argv0)
+{
+    printf("%s\n", PACKAGE_STRING);
+    printf("\n");
+    printf("Copyright (C) 2022 Michele Lindroos\n");
+    printf("This is free software; see the source for copying conditions.  There is NO\n");
+    printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+    printf("\n");
+    printf("Written by Michele Lindroos.\n");
+}
+
 void show_help(const char *argv0)
 {
     printf("`cache-hotness' is a benchmark tool to test the effect of \"cache hotness\" in task scheduling.\n");
@@ -175,6 +186,7 @@ int parse_options(struct settings *settings, int argc, char **argv)
         {"fifo_priority", required_argument, 0, 'f'},
         {"cpu", required_argument, 0, 'p'},
         {"outfile", required_argument, 0, 'o'},
+        {"version", no_argument, 0, 'V'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0},
     };
@@ -246,6 +258,9 @@ int parse_options(struct settings *settings, int argc, char **argv)
             case 'o':
                 strcpy(settings->outfile, optarg);
                 break;
+            case 'V':
+                show_version(argv[0]);
+                exit(EXIT_SUCCESS);
             case 'h':
             case '?':
                 show_help(argv[0]);
