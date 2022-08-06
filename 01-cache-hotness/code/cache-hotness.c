@@ -129,7 +129,7 @@ void show_help(const char *argv0)
     char memory_block_size_default[128];
     human_readable_size(getpagesize(), memory_block_size_default, sizeof(memory_block_size_default));
 
-    printf("Usage: %s [-vbmilcfp]\n", argv0);
+    printf("Usage: %s [OPTION]\n", argv0);
     printf("-v, --verbose[=VERBOSITY]\n");
     printf("    Set amount of verbosity: 0 for errors only, 1 for warnings, 2 for info (default), 3 for debug.\n");
     printf("-m, --memory_total\n");
