@@ -25,15 +25,10 @@ static int verbose = 2;
 
 struct settings {
     size_t cache_line_size; // retrieved from sysfs
-//    size_t memory_block_size;
     size_t memory_total;
     size_t access_per_cache_line;
-//    size_t memory_block_count; // calculated based on memory_block_size and memory_total
 
     size_t yield_count;
-//    size_t memory_access_per_iteration;
-//    size_t loop_count;
-//    size_t memory_access_total; // calculated based on loop_count and memory_access_per_iteration
 
     char outfile[PATH_MAX];
 
@@ -136,19 +131,12 @@ void show_help(const char *argv0)
     printf("Usage: %s [-vbmilcfp]\n", argv0);
     printf("-v, --verbose[=VERBOSITY]\n");
     printf("    Set amount of verbosity: 0 for errors only, 1 for warnings, 2 for info (default), 3 for debug.\n");
-//    printf("-b, --memory_block_size\n");
-//    printf("    Set size of blocks to traverse. Defaults to %s.\n", memory_block_size_default);
     printf("-m, --memory_total\n");
     printf("    Set total amount of memory to allocate both in parent and child. Default is 4 MB.\n");
     printf("-a, --access_per_cache_line\n");
     printf("    Specify amount of memory accesses per cache line. Default is 1.\n");
-//    printf("-i, --memory_access_per_iteration\n");
-//    printf("    Set memory accesses per iteration. Defaults to 1024.\n");
     printf("-y, --yield_count\n");
     printf("    Set yield count. Defaults to 16384.\n");
-//    printf("-l, --loop_count\n");
-//    printf("    Set loop count. The total amount of memory accesses will be loop_count times memory_access_per_iteration.\n");
-//    printf("    Defaults to 16384.\n");
     printf("-c, --concurrent[=yes|no]\n");
     printf("    Set concurrent or sequential run. If concurrent, both processes access memory concurrently (slower).\n");
     printf("    If unset, processes do sequential memory access, meaning the parent process runs first.\n");
@@ -165,12 +153,9 @@ int parse_options(struct settings *settings, int argc, char **argv)
 {
     const struct option long_options[] = {
         {"verbose", optional_argument, 0, 'v'},
-//        {"memory_block_size", required_argument, 0, 'b'},
         {"memory_total", required_argument, 0, 'm'},
         {"access_per_cache_line", required_argument, 0, 'a'},
-//        {"memory_access_per_iteration", required_argument, 0, 'i'},
         {"yield_count", required_argument, 0, 'y'},
-//        {"loop_count", required_argument, 0, 'l'},
         {"concurrent", optional_argument, 0, 'c'},
         {"fifo_priority", required_argument, 0, 'f'},
         {"cpu", required_argument, 0, 'p'},
@@ -205,24 +190,15 @@ int parse_options(struct settings *settings, int argc, char **argv)
                     }
                 }
                 break;
-//            case 'b':
-//                settings->memory_block_size = parse_size(optarg);
-//                break;
             case 'm':
                 settings->memory_total = parse_size(optarg);
                 break;
             case 'a':
                 settings->access_per_cache_line = atoi(optarg);
                 break;
-//            case 'i':
-//                settings->memory_access_per_iteration = atoi(optarg);
-//                break;
             case 'y':
                 settings->yield_count = atoi(optarg);
                 break;
-//            case 'l':
-//                settings->loop_count = atoi(optarg);
-//                break;
             case 'c':
                 if (optarg == NULL)
                 {
@@ -604,15 +580,10 @@ int synchronize(bool is_child, char phase, int parent_pipefds[], int child_pipef
 void initialize_settings(struct settings *settings)
 {
     settings->cache_line_size = get_cache_line_size();
-//    settings->memory_block_size = getpagesize();
     settings->memory_total = 4 * 1024 * 1024; // 4 MiB
     settings->access_per_cache_line = 1;
-//    settings->memory_block_count = settings->memory_total / settings->memory_block_size;
 
-//    settings->memory_access_per_iteration = 1024;
     settings->yield_count = 16;
-//    settings->loop_count = 16 * settings->memory_block_count;
-//    settings->memory_access_total = settings->loop_count * settings->memory_access_per_iteration;
 
     settings->concurrent_run = true;
     settings->fifo_priority = 1;
@@ -626,8 +597,6 @@ void initialize_settings(struct settings *settings)
 int configure(struct settings *settings)
 {
     char buf[128];
-//    settings->memory_block_count = settings->memory_total / settings->memory_block_size;
-//    settings->memory_access_total = settings->loop_count * settings->memory_access_per_iteration;
 
     if (set_affinity(settings->cpu))
     {
@@ -661,16 +630,10 @@ void print_settings(const struct settings *settings)
     char cache_sizes_str[100];
     get_cache_sizes_str(cache_sizes_str, sizeof(cache_sizes_str), settings->cpu, true);
     INFO("Cache sizes: %s\n", cache_sizes_str);
-//    human_readable_size(settings->memory_block_size, buf, sizeof(buf));
-//    INFO("Memory block size: %s\n", buf);
-//    INFO("Memory block count: %zu\n", settings->memory_block_count);
     human_readable_size(settings->memory_total, buf, sizeof(buf));
     INFO("Memory total: %s\n", buf);
     INFO("Accesses per cache line: %zu\n", settings->access_per_cache_line);
-//    INFO("Memory access per iteration: %zu\n", settings->memory_access_per_iteration);
-//    INFO("Loop count: %zu\n", settings->loop_count);
     INFO("Yield count: %zu\n", settings->yield_count);
-//    INFO("Memory access total: %zu\n", settings->memory_access_total);
 }
 
 int write_file(const struct settings *settings, const struct results *results)
@@ -757,12 +720,6 @@ int main(int argc, char *argv[])
         is_child = true;
     }
 
-    //size_t **memory_block = malloc(settings.memory_block_count * sizeof(size_t *));
-    //for (size_t i = 0; i < settings.memory_block_count; ++i)
-    //{
-    //    memory_block[i] = malloc(settings.memory_block_size);
-    //    memory_block[i][0] = 0;  // page fault to allocate the memory
-    //}
     size_t cache_line_count = settings.memory_total / settings.cache_line_size;
     size_t **memory_blocks = malloc(cache_line_count * sizeof(size_t *));
     for (size_t i = 0; i < cache_line_count; ++i)
@@ -835,36 +792,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    //for (size_t i = 0; i < settings.loop_count; ++i)
-    //{
-    //    if (is_child && !settings.concurrent_run)
-    //    {
-    //        sched_yield();
-    //        continue;
-    //    }
-
-    //    size_t base = i * settings.memory_access_per_iteration;
-    //    for (size_t j = 0; j < settings.memory_access_per_iteration; ++j)
-    //    {
-    //        size_t idx = (i + j) % settings.memory_block_count;
-    //        memory_block[idx][0]++;
-    //    }
-
-    //    sched_yield();
-    //}
-    //if (is_child && !settings.concurrent_run)
-    //{
-    //    for (size_t i = 0; i < settings.loop_count; ++i)
-    //    {
-    //        size_t base = i * settings.memory_access_per_iteration;
-    //        for (size_t j = 0; j < settings.memory_access_per_iteration; ++j)
-    //        {
-    //            size_t idx = (i + j) % settings.memory_block_count;
-    //            memory_block[idx][0]++;
-    //        }
-    //    }
-    //}
-
     struct timespec time_finished;
     if (clock_gettime(CLOCK_MONOTONIC, &time_finished))
     {
@@ -877,11 +804,6 @@ int main(int argc, char *argv[])
         free(memory_blocks[i]);
     }
     free(memory_blocks);
-    //for (size_t i = 0; i < settings.memory_block_count; ++i)
-    //{
-    //    free(memory_block[i]);
-    //}
-    //free(memory_block);
 
     long time_diff_ns = time_finished.tv_nsec - time_start.tv_nsec +
                         (time_finished.tv_sec - time_start.tv_sec) * 1000 * 1000 * 1000;
@@ -932,8 +854,6 @@ int main(int argc, char *argv[])
 
     INFO("Execution time average: %ld.%09ld s\n", time_diff_average.tv_sec, time_diff_average.tv_nsec);
 
-    //printf("[%s] Execution time: %ld.%09ld s\n", is_child ? "CHILD" : "PARENT", time_diff.tv_sec, time_diff.tv_nsec);
-
     ssize_t cpu_freq_finish = get_cpu_freq_cpuinfo(&settings);
     if (settings.cpu_freq != cpu_freq_finish)
     {
@@ -950,19 +870,6 @@ int main(int argc, char *argv[])
         }
         printf("[%s] CPU freq at finish: %s\n", is_child ? "CHILD" : "PARENT", buf);
     }
-
-    //for (size_t i = 0; i < settings.memory_block_count; ++i)
-    //{
-    //    free(memory_block[i]);
-    //}
-    //free(memory_block);
-
-    //synchronize(is_child, '2', parent_pipefds, child_pipefds);
-
-    //if (is_child)
-    //{
-    //    exit(EXIT_SUCCESS);
-    //}
 
     if (!is_child)
     {
