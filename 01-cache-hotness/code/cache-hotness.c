@@ -126,10 +126,17 @@ ssize_t human_readable_size(size_t size, char *buf, size_t buf_size)
 
 void show_help(const char *argv0)
 {
+    printf("`cache-hotness' is a benchmark tool to test the effect of \"cache hotness\" in task scheduling.\n");
+    printf("Run the program multiple time with concurrency on/off to see the effect.\n");
+    printf("\n");
+
+    printf("Usage: %s [OPTION]\n", argv0);
+    printf("\n");
+
     char memory_block_size_default[128];
     human_readable_size(getpagesize(), memory_block_size_default, sizeof(memory_block_size_default));
 
-    printf("Usage: %s [OPTION]\n", argv0);
+    printf("Options:\n");
     printf("-v, --verbose[=VERBOSITY]\n");
     printf("    Set amount of verbosity: 0 for errors only, 1 for warnings, 2 for info (default), 3 for debug.\n");
     printf("-m, --memory_total\n");
@@ -148,6 +155,16 @@ void show_help(const char *argv0)
     printf("    Choose the CPU core to run on. Defaults to cpu_count-1.\n");
     printf("-o, --outfile\n");
     printf("    Choose the CPU core to run on. Defaults to cpu_count-1.\n");
+    printf("\n");
+
+    printf("Examples:\n");
+    printf("%s --concurrent=yes\n", argv0);
+    printf("    Run with concurrency on.\n");
+    printf("%s --concurrent=no\n", argv0);
+    printf("    Run with concurrency off.\n");
+    printf("%s -o data.json\n", argv0);
+    printf("    Write test results to file data.json.\n");
+    printf("\n");
 }
 
 int parse_options(struct settings *settings, int argc, char **argv)
