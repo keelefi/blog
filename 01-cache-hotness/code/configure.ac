@@ -8,6 +8,8 @@ AC_USE_SYSTEM_EXTENSIONS
 
 AC_PROG_CC
 
+AC_PATH_PROG([SETCAP], [setcap], [/usr/sbin/setcap], [$PATH:/usr/sbin:/sbin])
+
 AC_CONFIG_FILES([
     Makefile
 ])
