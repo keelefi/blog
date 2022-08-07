@@ -1,0 +1,38 @@
+name: cache-hotness
+
+on:
+  push:
+    paths:
+    - '.github/workflows/cache-hotness.yml'
+    - '01-cache-hotness/code/**'
+
+env:
+  DEPENDENCIES:
+    build-essential
+    autoconf
+    autoconf-archive
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Packages
+        run: sudo apt-get install $DEPENDENCIES
+      - name: Build cache-hotness
+        working-directory: 01-cache-hotness/code/
+        run: |
+          autoreconf -vif
+          ./configure
+          make
+      - name: Build dist
+        working-directory: 01-cache-hotness/code/
+        run: |
+          make dist
+          echo "artifactName=$(ls cache-hotness-*.tar.gz)" >> ${GITHUB_ENV}
+      - name: Store tarball
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.artifactName }}
+          path: 01-cache-hotness/code/${{ env.artifactName }}
