@@ -133,6 +133,8 @@ void show_version(const char *argv0)
     printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
     printf("\n");
     printf("Written by Michele Lindroos.\n");
+    printf("\n");
+    printf("Report bugs to %s\n.", PACKAGE_BUGREPORT);
 }
 
 void show_help(const char *argv0)

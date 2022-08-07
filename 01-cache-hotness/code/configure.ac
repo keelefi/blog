@@ -1,4 +1,4 @@
-AC_INIT([cache-hotness], [0.1])
+AC_INIT([cache-hotness], [0.1], [https://github.com/keelefi/blog])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AX_PROG_HELP2MAN
