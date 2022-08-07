@@ -682,6 +682,7 @@ int write_file(const struct settings *settings, const struct results *results)
 
     dprintf(fd, "{\n");
     dprintf(fd, "   \"general\": {\n");
+    dprintf(fd, "       \"version\": \"%s\",\n", PACKAGE_VERSION);
     dprintf(fd, "       \"algorithm\": \"SCHED_FIFO\",\n");
     dprintf(fd, "   },\n");
     dprintf(fd, "   \"cpu\": {\n");
