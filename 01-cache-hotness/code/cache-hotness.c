@@ -152,7 +152,7 @@ void show_help(const char *argv0)
     printf("-a, --access_per_cache_line\n");
     printf("    Specify amount of memory accesses per cache line. Default is 1.\n");
     printf("-y, --yield_count\n");
-    printf("    Set yield count. Defaults to 16384.\n");
+    printf("    Set yield count. Defaults to 16.\n");
     printf("-c, --concurrent[=yes|no]\n");
     printf("    Set concurrent or sequential run. If concurrent, both processes access memory concurrently (slower).\n");
     printf("    If unset, processes do sequential memory access, meaning the parent process runs first.\n");
