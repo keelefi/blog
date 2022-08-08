@@ -367,19 +367,6 @@ ssize_t get_cpu_freq_cpuinfo(const struct settings *settings)
     return get_cpu_freq(settings->cpu, SYS_PATH);
 }
 
-ssize_t get_cpu_freq_scaling(const struct settings *settings)
-{
-    char SYS_PATH[128];
-    if (snprintf(SYS_PATH, sizeof(SYS_PATH)-1, "/sys/devices/system/cpu/cpu%zu/cpufreq/scaling_cur_freq", settings->cpu) < 0)
-    {
-        perror("snprintf");
-        return -1;
-    }
-    DEBUG("Reading CPU frequency from: %s\n", SYS_PATH);
-
-    return get_cpu_freq(settings->cpu, SYS_PATH);
-}
-
 int cpu_freq_to_str(ssize_t cpu_freq, char *buf, size_t buf_size)
 {
     ssize_t gigahz = cpu_freq / (1000 * 1000);
