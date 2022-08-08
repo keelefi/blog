@@ -348,7 +348,21 @@ ssize_t get_cpu_freq_cpuinfo(const struct settings *settings)
         perror("snprintf");
         return -1;
     }
+
     DEBUG("Reading CPU frequency from: %s\n", SYS_PATH);
+
+    if (access(SYS_PATH, R_OK))
+    {
+        if (errno == ENOENT)
+        {
+            WARNING("CPU Freq not available at: %s\n", SYS_PATH);
+            WARNING("Please, make sure that frequency scaling is turned off.\n");
+            return 0;
+        }
+
+        perror("access");
+        return -1;
+    }
 
     return get_cpu_freq(settings->cpu, SYS_PATH);
 }
@@ -640,11 +654,14 @@ int configure(struct settings *settings)
     {
         return -1;
     }
-    if (cpu_freq_to_str(settings->cpu_freq, buf, sizeof(buf)))
+    if (settings->cpu_freq)
     {
-        return -1;
+        if (cpu_freq_to_str(settings->cpu_freq, buf, sizeof(buf)))
+        {
+            return -1;
+        }
+        INFO("CPU freq: %s\n", buf);
     }
-    INFO("CPU freq: %s\n", buf);
 
     if (set_fifo_scheduling(settings->fifo_priority))
     {
@@ -887,21 +904,24 @@ int main(int argc, char *argv[])
 
     INFO("Execution time average: %ld.%09ld s\n", time_diff_average.tv_sec, time_diff_average.tv_nsec);
 
-    ssize_t cpu_freq_finish = get_cpu_freq_cpuinfo(&settings);
-    if (settings.cpu_freq != cpu_freq_finish)
+    if (settings.cpu_freq)
     {
-        WARNING("CPU freq at start is different than at finish!\n");
-        WARNING("Turn off freq scaling for more reliable results\n");
-        if (cpu_freq_to_str(settings.cpu_freq, buf, sizeof(buf)))
+        ssize_t cpu_freq_finish = get_cpu_freq_cpuinfo(&settings);
+        if (settings.cpu_freq != cpu_freq_finish)
         {
-            exit(EXIT_FAILURE);
+            WARNING("CPU freq at start is different than at finish!\n");
+            WARNING("Turn off freq scaling for more reliable results\n");
+            if (cpu_freq_to_str(settings.cpu_freq, buf, sizeof(buf)))
+            {
+                exit(EXIT_FAILURE);
+            }
+            WARNING("CPU freq at start: %s\n", buf);
+            if (cpu_freq_to_str(cpu_freq_finish, buf, sizeof(buf)))
+            {
+                exit(EXIT_FAILURE);
+            }
+            WARNING("CPU freq at finish: %s\n", buf);
         }
-        WARNING("CPU freq at start: %s\n", buf);
-        if (cpu_freq_to_str(cpu_freq_finish, buf, sizeof(buf)))
-        {
-            exit(EXIT_FAILURE);
-        }
-        WARNING("CPU freq at finish: %s\n", buf);
     }
 
     if (!is_child)
