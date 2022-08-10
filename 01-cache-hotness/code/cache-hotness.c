@@ -351,7 +351,8 @@ ssize_t get_cpu_freq_cpuinfo(const struct settings *settings)
 
     DEBUG("Reading CPU frequency from: %s\n", SYS_PATH);
 
-    if (access(SYS_PATH, R_OK))
+    struct stat filestat;
+    if (stat(SYS_PATH, &filestat))
     {
         if (errno == ENOENT)
         {
@@ -360,7 +361,7 @@ ssize_t get_cpu_freq_cpuinfo(const struct settings *settings)
             return 0;
         }
 
-        perror("access");
+        perror("stat");
         return -1;
     }
 
