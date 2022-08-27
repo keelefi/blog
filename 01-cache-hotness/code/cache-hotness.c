@@ -815,7 +815,7 @@ int main(int argc, char *argv[])
         {
             for (size_t k = 0; k < settings.access_per_cache_line; ++k)
             {
-                memory_blocks[j][k]++;
+                memory_blocks[j][k%(settings.cache_line_size/sizeof(size_t))]++;
             }
         }
 
@@ -843,7 +843,7 @@ int main(int argc, char *argv[])
             {
                 for (size_t k = 0; k < settings.access_per_cache_line; ++k)
                 {
-                    memory_blocks[j][k]++;
+                    memory_blocks[j][k%(settings.cache_line_size/sizeof(size_t))]++;
                 }
             }
         }
