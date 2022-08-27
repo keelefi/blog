@@ -90,7 +90,7 @@ size_t parse_size(const char *str)
         multiplier = 1024 * 1024 * 1024;
     }
 
-    char *new_str = malloc(str_length);
+    char *new_str = malloc(str_length+1);
     strcpy(new_str, str);
     new_str[str_length-1] = '\0';
 
