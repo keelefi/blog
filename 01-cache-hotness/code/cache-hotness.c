@@ -52,6 +52,15 @@ struct results {
     size_t ivcsw_parent;
     size_t vcsw_child;
     size_t ivcsw_child;
+
+    size_t minflt_parent_start;
+    size_t minflt_parent_end;
+    size_t majflt_parent_start;
+    size_t majflt_parent_end;
+    size_t minflt_child_start;
+    size_t minflt_child_end;
+    size_t majflt_child_start;
+    size_t majflt_child_end;
 };
 
 void print_msg(int level, const char *format, ...)
@@ -713,6 +722,14 @@ int write_file(const struct settings *settings, const struct results *results)
     dprintf(fd, "       \"ivcsw_parent\": %zu,\n", results->ivcsw_parent);
     dprintf(fd, "       \"vcsw_child\": %zu,\n", results->vcsw_child);
     dprintf(fd, "       \"ivcsw_child\": %zu,\n", results->ivcsw_child);
+    dprintf(fd, "       \"minflt_parent_start\": %zu,\n", results->minflt_parent_start);
+    dprintf(fd, "       \"minflt_parent_end\": %zu,\n", results->minflt_parent_end);
+    dprintf(fd, "       \"majflt_parent_start\": %zu,\n", results->majflt_parent_start);
+    dprintf(fd, "       \"majflt_parent_end\": %zu,\n", results->majflt_parent_end);
+    dprintf(fd, "       \"minflt_child_start\": %zu,\n", results->minflt_child_start);
+    dprintf(fd, "       \"minflt_child_end\": %zu,\n", results->minflt_child_end);
+    dprintf(fd, "       \"majflt_child_start\": %zu,\n", results->majflt_child_start);
+    dprintf(fd, "       \"majflt_child_end\": %zu,\n", results->majflt_child_end);
     dprintf(fd, "   }\n");
     dprintf(fd, "}\n");
 
@@ -769,6 +786,13 @@ int main(int argc, char *argv[])
 
     if (synchronize(is_child, '1', parent_pipefds, child_pipefds))
     {
+        exit(EXIT_FAILURE);
+    }
+
+    struct rusage rusage_self;
+    if (getrusage(RUSAGE_SELF, &rusage_self))
+    {
+        perror("getrusage");
         exit(EXIT_FAILURE);
     }
 
@@ -847,6 +871,11 @@ int main(int argc, char *argv[])
 
     if (is_child)
     {
+        if (write(child_pipefds[1], &rusage_self, sizeof(rusage_self)) == -1)
+        {
+            perror("write");
+            exit(EXIT_FAILURE);
+        }
         if (write(child_pipefds[1], &time_diff_middle, sizeof(time_diff_middle)) == -1)
         {
             perror("write");
@@ -860,8 +889,14 @@ int main(int argc, char *argv[])
         exit(EXIT_SUCCESS);
     }
 
+    struct rusage rusage_child_start;
     struct timespec time_diff_middle_child;
     struct timespec time_diff_child;
+    if (read(child_pipefds[0], &rusage_child_start, sizeof(rusage_child_start)) == -1)
+    {
+        perror("read");
+        exit(EXIT_FAILURE);
+    }
     if (read(child_pipefds[0], &time_diff_middle_child, sizeof(time_diff_middle_child)) == -1)
     {
         perror("read");
@@ -925,6 +960,11 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    INFO("Parent minor page faults diff: %zu\n", rusage_parent.ru_minflt - rusage_self.ru_minflt);
+    INFO("Parent major page faults diff: %zu\n", rusage_parent.ru_majflt - rusage_self.ru_majflt);
+    INFO("Child minor page faults diff: %zu\n", rusage_child.ru_minflt - rusage_child_start.ru_minflt);
+    INFO("Child major page faults diff: %zu\n", rusage_child.ru_majflt - rusage_child_start.ru_majflt);
+
     INFO("Parent voluntary context switches: %zu\n", rusage_parent.ru_nvcsw);
     INFO("Parent involuntary context switches: %zu\n", rusage_parent.ru_nivcsw);
     INFO("Child voluntary context switches: %zu\n", rusage_child.ru_nvcsw);
@@ -940,6 +980,14 @@ int main(int argc, char *argv[])
         .ivcsw_parent = rusage_parent.ru_nivcsw,
         .vcsw_child = rusage_child.ru_nvcsw,
         .ivcsw_child = rusage_child.ru_nivcsw,
+        .minflt_parent_start = rusage_self.ru_minflt,
+        .minflt_parent_end = rusage_parent.ru_minflt,
+        .majflt_parent_start = rusage_self.ru_majflt,
+        .majflt_parent_end = rusage_parent.ru_majflt,
+        .minflt_child_start = rusage_self.ru_minflt,
+        .minflt_child_end = rusage_child.ru_minflt,
+        .majflt_child_start = rusage_self.ru_majflt,
+        .majflt_child_end = rusage_child.ru_majflt,
     };
     if (strlen(settings.outfile) > 0)
     {
