@@ -13,6 +13,7 @@
 #include <linux/limits.h>
 #include <sched.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/sysinfo.h>
@@ -763,14 +764,8 @@ int main(int argc, char *argv[])
     for (size_t i = 0; i < cache_line_count; ++i)
     {
         memory_blocks[i] = malloc(settings.cache_line_size);
-
-        // make sure memory is mapped to real memory, not just virtual
-        // otherwise we could end up having page faults during the actual benchmark, distorting the measurements
-        for (size_t k = 0; k < settings.access_per_cache_line; ++k)
-        {
-            memory_blocks[i][k] = 0; 
-        }
     }
+    mlockall(MCL_CURRENT);
 
     if (synchronize(is_child, '1', parent_pipefds, child_pipefds))
     {
