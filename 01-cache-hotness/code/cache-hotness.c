@@ -697,9 +697,18 @@ int write_file(const struct settings *settings, const struct results *results)
     char cache_sizes_str[100];
     get_cache_sizes_str(cache_sizes_str, sizeof(cache_sizes_str), settings->cpu, false);
 
+    char hostname[HOST_NAME_MAX];
+    if (gethostname(hostname, HOST_NAME_MAX))
+    {
+        perror("gethostname");
+        return -1;
+    }
+    
+
     dprintf(fd, "{\n");
     dprintf(fd, "   \"general\": {\n");
     dprintf(fd, "       \"version\": \"%s\",\n", PACKAGE_VERSION);
+    dprintf(fd, "       \"hostname\": \"%s\",\n", hostname);
     dprintf(fd, "       \"algorithm\": \"SCHED_FIFO\"\n");
     dprintf(fd, "   },\n");
     dprintf(fd, "   \"cpu\": {\n");
