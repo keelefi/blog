@@ -996,9 +996,9 @@ int main(int argc, char *argv[])
         .minflt_parent_end = rusage_parent.ru_minflt,
         .majflt_parent_start = rusage_self.ru_majflt,
         .majflt_parent_end = rusage_parent.ru_majflt,
-        .minflt_child_start = rusage_self.ru_minflt,
+        .minflt_child_start = rusage_child_start.ru_minflt,
         .minflt_child_end = rusage_child.ru_minflt,
-        .majflt_child_start = rusage_self.ru_majflt,
+        .majflt_child_start = rusage_child_start.ru_majflt,
         .majflt_child_end = rusage_child.ru_majflt,
     };
     if (strlen(settings.outfile) > 0)
