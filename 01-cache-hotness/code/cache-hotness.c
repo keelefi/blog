@@ -38,7 +38,8 @@ struct settings {
     int fifo_priority;
 
     size_t cpu;
-    ssize_t cpu_freq; // not configurable
+    ssize_t cpu_freq_start;
+    ssize_t cpu_freq_finish;
 };
 
 struct results {
@@ -633,7 +634,8 @@ void initialize_settings(struct settings *settings)
     settings->fifo_priority = 1;
 
     settings->cpu = get_cpu_count() - 1;
-    settings->cpu_freq = -1;
+    settings->cpu_freq_start = -1;
+    settings->cpu_freq_finish = -1;
 
     strcpy(settings->outfile, "");
 }
@@ -647,14 +649,14 @@ int configure(struct settings *settings)
         return -1;
     }
 
-    settings->cpu_freq = get_cpu_freq_cpuinfo(settings);
-    if (settings->cpu_freq == -1)
+    settings->cpu_freq_start = get_cpu_freq_cpuinfo(settings);
+    if (settings->cpu_freq_start == -1)
     {
         return -1;
     }
-    if (settings->cpu_freq)
+    if (settings->cpu_freq_start)
     {
-        if (cpu_freq_to_str(settings->cpu_freq, buf, sizeof(buf)))
+        if (cpu_freq_to_str(settings->cpu_freq_start, buf, sizeof(buf)))
         {
             return -1;
         }
@@ -702,7 +704,8 @@ int write_file(const struct settings *settings, const struct results *results)
     dprintf(fd, "   },\n");
     dprintf(fd, "   \"cpu\": {\n");
     dprintf(fd, "       \"id\": %zu,\n", settings->cpu);
-    dprintf(fd, "       \"cpu_freq\": %zu,\n", settings->cpu_freq);
+    dprintf(fd, "       \"cpu_freq_start\": %zu,\n", settings->cpu_freq_start);
+    dprintf(fd, "       \"cpu_freq_finish\": %zu,\n", settings->cpu_freq_finish);
     dprintf(fd, "       \"cache_line_size\": %zu,\n", settings->cache_line_size);
     dprintf(fd, "       \"cache_sizes\": %s\n", cache_sizes_str);
     dprintf(fd, "   },\n");
@@ -922,19 +925,19 @@ int main(int argc, char *argv[])
 
     INFO("Execution time average: %ld.%09ld s\n", time_diff_average.tv_sec, time_diff_average.tv_nsec);
 
-    if (settings.cpu_freq)
+    if (settings.cpu_freq_start)
     {
-        ssize_t cpu_freq_finish = get_cpu_freq_cpuinfo(&settings);
-        if (settings.cpu_freq != cpu_freq_finish)
+        settings.cpu_freq_finish = get_cpu_freq_cpuinfo(&settings);
+        if (settings.cpu_freq_start != settings.cpu_freq_finish)
         {
             WARNING("CPU freq at start is different than at finish!\n");
             WARNING("Turn off freq scaling for more reliable results\n");
-            if (cpu_freq_to_str(settings.cpu_freq, buf, sizeof(buf)))
+            if (cpu_freq_to_str(settings.cpu_freq_start, buf, sizeof(buf)))
             {
                 exit(EXIT_FAILURE);
             }
             WARNING("CPU freq at start: %s\n", buf);
-            if (cpu_freq_to_str(cpu_freq_finish, buf, sizeof(buf)))
+            if (cpu_freq_to_str(settings.cpu_freq_finish, buf, sizeof(buf)))
             {
                 exit(EXIT_FAILURE);
             }
