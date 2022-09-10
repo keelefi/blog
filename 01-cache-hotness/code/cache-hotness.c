@@ -827,7 +827,9 @@ int main(int argc, char *argv[])
         {
             for (size_t k = 0; k < settings.access_per_cache_line; ++k)
             {
-                memory_blocks[j][k%(settings.cache_line_size/sizeof(size_t))]++;
+                // instead of modulus, use bitwise and
+                // hope that the compiler optimizes the division into a bit shift
+                memory_blocks[j][k&(settings.cache_line_size/sizeof(size_t)-1)]++;
             }
         }
 
@@ -855,7 +857,7 @@ int main(int argc, char *argv[])
             {
                 for (size_t k = 0; k < settings.access_per_cache_line; ++k)
                 {
-                    memory_blocks[j][k%(settings.cache_line_size/sizeof(size_t))]++;
+                    memory_blocks[j][k&(settings.cache_line_size/sizeof(size_t)-1)]++;
                 }
             }
         }
