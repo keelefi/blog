@@ -7,15 +7,15 @@ with Autoconf and ships a man-page.
 
 Fetch source tarball:
 
-    $ wget https://github.com/keelefi/blog/releases/download/cache-hotness-v1.2/cache-hotness-1.2.tar.gz
+    $ wget https://github.com/keelefi/blog/releases/download/cache-hotness-v1.3/cache-hotness-1.3.tar.gz
 
 Untar:
 
-    $ tar xvf cache-hotness-1.2.tar.gz
+    $ tar xvf cache-hotness-1.3.tar.gz
 
 Change directory:
 
-    $ cd cache-hotness-1.2/
+    $ cd cache-hotness-1.3/
 
 Configure:
 
