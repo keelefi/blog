@@ -29,6 +29,7 @@ struct settings {
     size_t cache_line_size; // retrieved from sysfs
     size_t memory_total;
     size_t access_per_cache_line;
+    size_t iterations_per_yield;
 
     size_t yield_count;
 
@@ -164,6 +165,8 @@ void show_help(const char *argv0)
     printf("    Set total amount of memory to allocate both in parent and child. Default is 4 MB.\n");
     printf("-a, --access_per_cache_line\n");
     printf("    Specify amount of memory accesses per cache line. Default is 1.\n");
+    printf("-i, --iterations_per_yield\n");
+    printf("    Specify amount of iterations during each scheduled slot. Default is 1.\n");
     printf("-y, --yield_count\n");
     printf("    Set yield count. Defaults to 16.\n");
     printf("-c, --concurrent[=yes|no]\n");
@@ -194,6 +197,7 @@ int parse_options(struct settings *settings, int argc, char **argv)
         {"verbose", optional_argument, 0, 'v'},
         {"memory_total", required_argument, 0, 'm'},
         {"access_per_cache_line", required_argument, 0, 'a'},
+        {"iterations_per_yield", required_argument, 0, 'i'},
         {"yield_count", required_argument, 0, 'y'},
         {"concurrent", optional_argument, 0, 'c'},
         {"fifo_priority", required_argument, 0, 'f'},
@@ -203,7 +207,7 @@ int parse_options(struct settings *settings, int argc, char **argv)
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0},
     };
-    const char *short_options = "hv:m:a:y:c:f:p:o:";
+    const char *short_options = "hv:m:a:i:y:c:f:p:o:";
 
     int c;
     while ((c = getopt_long (argc, argv, short_options, long_options, NULL)) != -1)
@@ -235,6 +239,9 @@ int parse_options(struct settings *settings, int argc, char **argv)
                 break;
             case 'a':
                 settings->access_per_cache_line = atoi(optarg);
+                break;
+            case 'i':
+                settings->iterations_per_yield = atoi(optarg);
                 break;
             case 'y':
                 settings->yield_count = atoi(optarg);
@@ -627,6 +634,7 @@ void initialize_settings(struct settings *settings)
     settings->cache_line_size = get_cache_line_size();
     settings->memory_total = 4 * 1024 * 1024; // 4 MiB
     settings->access_per_cache_line = 1;
+    settings->iterations_per_yield = 1;
 
     settings->yield_count = 16;
 
@@ -682,6 +690,7 @@ void print_settings(const struct settings *settings)
     human_readable_size(settings->memory_total, buf, sizeof(buf));
     INFO("Memory total: %s\n", buf);
     INFO("Accesses per cache line: %zu\n", settings->access_per_cache_line);
+    INFO("Iterations per yield: %zu\n", settings->iterations_per_yield);
     INFO("Yield count: %zu\n", settings->yield_count);
 }
 
@@ -723,6 +732,7 @@ int write_file(const struct settings *settings, const struct results *results)
     dprintf(fd, "       \"memory\": %zu,\n", settings->memory_total);
     dprintf(fd, "       \"yield_count\": %zu,\n", settings->yield_count);
     dprintf(fd, "       \"access_per_cache_line\": %zu\n", settings->access_per_cache_line);
+    dprintf(fd, "       \"iterations_per_yield\": %zu\n", settings->iterations_per_yield);
     dprintf(fd, "   },\n");
     dprintf(fd, "   \"result\": {\n");
     dprintf(fd, "       \"time\": %ld.%09ld,\n", results->time.tv_sec, results->time.tv_nsec);
@@ -823,13 +833,16 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        for (size_t j = 0; j < cache_line_count; ++j)
+        for (size_t j = 0; j < settings.iterations_per_yield; ++j)
         {
-            for (size_t k = 0; k < settings.access_per_cache_line; ++k)
+            for (size_t n = 0; n < cache_line_count; ++n)
             {
-                // instead of modulus, use bitwise and
-                // hope that the compiler optimizes the division into a bit shift
-                memory_blocks[j][k&(settings.cache_line_size/sizeof(size_t)-1)]++;
+                for (size_t m = 0; m < settings.access_per_cache_line; ++m)
+                {
+                    // instead of modulus, use bitwise and
+                    // hope that the compiler optimizes the division into a bit shift
+                    memory_blocks[n][m&(settings.cache_line_size/sizeof(size_t)-1)]++;
+                }
             }
         }
 
@@ -853,11 +866,14 @@ int main(int argc, char *argv[])
     {
         for (size_t i = 0; i < settings.yield_count; ++i)
         {
-            for (size_t j = 0; j < cache_line_count; ++j)
+            for (size_t j = 0; j < settings.iterations_per_yield; ++j)
             {
-                for (size_t k = 0; k < settings.access_per_cache_line; ++k)
+                for (size_t n = 0; n < cache_line_count; ++n)
                 {
-                    memory_blocks[j][k&(settings.cache_line_size/sizeof(size_t)-1)]++;
+                    for (size_t m = 0; m < settings.access_per_cache_line; ++m)
+                    {
+                        memory_blocks[n][m&(settings.cache_line_size/sizeof(size_t)-1)]++;
+                    }
                 }
             }
         }
