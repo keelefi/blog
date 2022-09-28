@@ -731,7 +731,7 @@ int write_file(const struct settings *settings, const struct results *results)
     dprintf(fd, "       \"concurrent\": %s,\n", settings->concurrent_run ? "true" : "false");
     dprintf(fd, "       \"memory\": %zu,\n", settings->memory_total);
     dprintf(fd, "       \"yield_count\": %zu,\n", settings->yield_count);
-    dprintf(fd, "       \"access_per_cache_line\": %zu\n", settings->access_per_cache_line);
+    dprintf(fd, "       \"access_per_cache_line\": %zu,\n", settings->access_per_cache_line);
     dprintf(fd, "       \"iterations_per_yield\": %zu\n", settings->iterations_per_yield);
     dprintf(fd, "   },\n");
     dprintf(fd, "   \"result\": {\n");
