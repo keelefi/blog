@@ -17,19 +17,6 @@ Similar to securing supply chains of physical goods, securing supply chains of s
 and is ultimately built on trust. In my professional life, every software company I've worked for has had as their main
 solution to pay a third party company to provide supply chain security.
 
-If you work in cloud environments, you typically pay a company such as Red Hat, Canonical or Suse. I have more
-experience with embedded systems and there the companies undergo constant merges and acquisitions and therefore the
-names constantly change and aren't well-known to the general public. Having worked with several third party providers,
-I've gotten the impression that security is achieved by code reviews, automation, using popular software and ultimately
-just delaying software releases as it increases the likelihood nefarious code is spotted.
-
-In my personal life I trust big software repositories such as Debian and Ubuntu. Rolling distributions such as Arch I
-trust far less. However, I think a far greater attack surface is outside of distribution package management. For
-example, for years the official installation procedure for *docker-compose* on Ubuntu was to download a script from the
-web and run it with superuser priviledges. The security problems related to this pattern are beyong scope for this blog
-post, but it's extremely bad. All I have to say here is that for the overwhelming majority of personal use the supply
-chain threats aren't in the software distribution, but elsewhere.
-
 The benefits of reproducible builds aren't limited to security. The capability to perform **rollbacks** can be very
 valuable both in professional and personal settings. When upgrading compilers and dependencies to newer versions, it is
 not uncommon something breaks and a rollback is needed.
