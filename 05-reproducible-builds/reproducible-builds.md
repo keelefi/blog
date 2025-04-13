@@ -4,7 +4,7 @@ The interest in reproducible builds has picked up in the past few decades. This 
 better capabilities. In this blog post I comment on the general uses cases of reproducible builds.
 
 One of the problems plaguing reproducible builds is that it is widely considered a niche use case with mostly
-theoretical interest. This argument is not without merrit. In most cases software is being run on hardware and in
+theoretical interest. This argument is not without merit. In most cases software is being run on hardware and in
 environments that don't provide reproducible conditions. Therefore, the effort spent on reproducible builds is better
 spent on controlling the execution environment.
 
